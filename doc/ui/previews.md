@@ -87,8 +87,8 @@ uses, followed by dim text:
 > - **(guess)** sources are inferred from the injected text itself.
 > - **Dropped** parts were replaced by a custom system prompt and are counted
 >   nowhere.
-> - **Moved** blocks sit outside the region pi renders them into and count
->   normally.
+> - **Moved** blocks appear in a different position in the system prompt than
+>   usual. Their token counts are unchanged.
 
 Each sentence is fixed and states its own accounting, so the `Dropped` bullet
 reads as the exception to the `Highlighted` one wherever a preview shows both.

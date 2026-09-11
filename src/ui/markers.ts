@@ -51,7 +51,8 @@ const MARKER_LEGENDS: Record<ContextMarker, MarkerLegend> = {
 	moved: {
 		keyword: "Moved",
 		color: "warning",
-		explanation: " blocks sit outside the region pi renders them into and count normally.",
+		explanation: " blocks appear in a different position in the system prompt than usual." +
+			" Their token counts are unchanged.",
 	},
 };
 

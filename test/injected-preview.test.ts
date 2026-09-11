@@ -43,7 +43,8 @@ const LEGEND: Record<ContextMarker, { keyword: string; color: ThemeColor; senten
 	moved: {
 		keyword: "Moved",
 		color: "warning",
-		sentence: "blocks sit outside the region pi renders them into and count normally.",
+		sentence: "blocks appear in a different position in the system prompt than usual." +
+			" Their token counts are unchanged.",
 	},
 };
 const DESCRIPTION = `- ${LEGEND.highlighted.keyword} ${LEGEND.highlighted.sentence}`;
