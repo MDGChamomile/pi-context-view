@@ -21,6 +21,7 @@ readonly _RECORD_TARGETS=(
     'recordings/context-injections.rec.sh'
     'recordings/zoom.rec.sh'
     'recordings/palettes.rec.sh'
+    'recordings/map-sizes.rec.sh'
     'palettes-panel.sh'
 )
 

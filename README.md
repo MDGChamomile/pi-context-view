@@ -65,7 +65,7 @@ pi install npm:pi-context-view
 
 ## Customization
 
-At the moment, only the `Context Usage` map colors are customizable.
+At the moment, only the `Context Usage` map colors and size are customizable.
 
 A config populated with the current defaults is a good starting point for
 customization. Create it with:
@@ -89,6 +89,12 @@ them to theme-independent hex values. Here are examples of custom
 
 See [PI-THEME-COLORS](https://github.com/dimk90/pi-context-view/blob/develop/doc/PI-THEME-COLORS.md) 
 for color names that follow the current theme.
+
+### Map Size
+
+You can change row x cols shape for the `Context Usage` map via config:
+
+![Map size demo]()
 
 
 ## Context Footprint
