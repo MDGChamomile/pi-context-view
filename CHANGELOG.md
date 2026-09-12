@@ -3,7 +3,11 @@
 
 ## `[Unreleased]`
 
+### New
+* `[config]` Add `mapCols` and `mapRows` to size the `Context Usage` map.
+
 ### Changed
+* `[usage]` Enlarge the default context map to 16x20 cells, clamped to the viewport.
 * `[ui]` Explain `Highlighted`, `(guess)`, `Dropped`, and `Moved` as color-keyed description bullets.
 
 

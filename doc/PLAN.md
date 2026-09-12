@@ -1,11 +1,11 @@
 
 ## `Backlog`
 
-- [ ] **Make context usage map size (rows, cols) configurable**:
-  - Add rows and cols parameters to the config.
-  - Increase default rows and cols, especially rows.
-  - Add subsection "Map Size" to README "Customization" section.
-  - Add image with demo for different map shapes.
+- [ ] **Update demo recordings**:
+  - Switch to the new `S-VHS` version.
+  - Move recording to the same folder with rendered results.
+  - Add decoy recording to simplify recording reproduction.
+  - [ ] Add recording for map row/col customization demo.
 
 - [ ] **Add scrollbar to text previews**.
   - fullscreen mode only?

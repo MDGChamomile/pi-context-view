@@ -183,6 +183,7 @@ export default function (pi: ExtensionAPI) {
 				// Reported inside the view: a notification would stay hidden behind the fullscreen overlay.
 				notices: loadedConfig.warnings,
 				categoryColors: loadedConfig.config.categoryColors,
+				mapSize: loadedConfig.config.mapSize,
 			});
 		},
 	});

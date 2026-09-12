@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { Theme, type ThemeColor } from "@earendil-works/pi-coding-agent";
 import { visibleWidth } from "@earendil-works/pi-tui";
 
-import { DEFAULT_CATEGORY_COLORS, THEME_COLOR_NAMES } from "../src/config.ts";
+import { DEFAULT_CATEGORY_COLORS, DEFAULT_MAP_SIZE, THEME_COLOR_NAMES } from "../src/config.ts";
 import { analyzeSystemPrompt } from "../src/measure.ts";
 import { buildSnapshot, type InitialSnapshot } from "../src/model.ts";
 import { InjectionsView } from "../src/ui/injections-view.ts";
@@ -205,7 +205,12 @@ test("Usage opens System Prompt sections directly and retains attribution withou
 	let height = 40;
 	const theme = createTheme();
 	const usage = computeUsage({ snapshot: createSnapshot(), messages: [] });
-	const view = new UsageView(theme, { usage, categoryColors: DEFAULT_CATEGORY_COLORS }, () => {}, () => height);
+	const view = new UsageView(
+		theme,
+		{ usage, categoryColors: DEFAULT_CATEGORY_COLORS, mapSize: DEFAULT_MAP_SIZE },
+		() => {},
+		() => height,
+	);
 	const dashboard = view.render(120);
 	assert.doesNotMatch(plain(dashboard), /verify claims|Highlighted parts/);
 	view.handleInput("\r");
@@ -378,6 +383,7 @@ function createPreview(target: PreviewTarget, theme: Theme, getRows: () => numbe
 	const view = new UsageView(theme, {
 		usage: { ...usage, categories, estimatedTokens: usage.estimatedTokens + (target === "usage-single" ? 0 : 1) },
 		categoryColors: new Map(DEFAULT_CATEGORY_COLORS).set("system-prompt", "error"),
+		mapSize: DEFAULT_MAP_SIZE,
 	}, () => {}, getRows);
 	view.render(120);
 	view.handleInput("\r");
@@ -570,13 +576,19 @@ test("a relocated block stays a counted System Prompt part, marked where it now 
 test("Usage preserves moved parts, their estimates, and their marker across theme invalidation", () => {
 	const theme = createTheme();
 	const usage = computeUsage({ snapshot: createRelocatedSnapshot(), messages: [] });
-	const view = new UsageView(theme, { usage, categoryColors: DEFAULT_CATEGORY_COLORS }, () => {}, () => 40);
+	const view = new UsageView(
+		theme,
+		{ usage, categoryColors: DEFAULT_CATEGORY_COLORS, mapSize: DEFAULT_MAP_SIZE },
+		() => {},
+		() => 40,
+	);
 	const dashboard = view.render(120);
 	assert.doesNotMatch(plain(dashboard), /Read files|Moved/);
 	view.handleInput("\r");
 	const preview = view.render(120);
 	assert.match(plain(preview), /Available Tools · 9 tokens · Moved/);
 	assert.match(plain(preview), /Guidelines · 11 tokens · Moved/);
+	assertLegend(preview, theme, ["highlighted", "moved"]);
 	assert.ok(preview.some((line) => line.includes(styledMarker(theme, "moved"))));
 	const originalFg = theme.fg.bind(theme);
 	theme.fg = (color, text) => originalFg(color === "warning" ? "success" : color, text);
@@ -619,6 +631,7 @@ test("Usage explains markers in categories beyond the System Prompt, at both pre
 		const view = new UsageView(theme, {
 			usage: { ...usage, categories },
 			categoryColors: DEFAULT_CATEGORY_COLORS,
+			mapSize: DEFAULT_MAP_SIZE,
 		}, () => {}, () => 40);
 		view.render(120);
 		view.handleInput("\r");
@@ -655,7 +668,9 @@ test("native-only System Prompt and sibling previews do not claim extension inje
 	assert.doesNotMatch(plain(view.render(120)), /Highlighted parts|Arrow-marked/);
 
 	const usage = new UsageView(theme, {
-		usage: computeUsage({ snapshot, messages: [] }), categoryColors: DEFAULT_CATEGORY_COLORS,
+		usage: computeUsage({ snapshot, messages: [] }),
+		categoryColors: DEFAULT_CATEGORY_COLORS,
+		mapSize: DEFAULT_MAP_SIZE,
 	}, () => {}, () => 40);
 	usage.handleInput("\r");
 	assert.doesNotMatch(plain(usage.render(120)), /Highlighted parts|Arrow-marked/);

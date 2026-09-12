@@ -167,4 +167,5 @@ UI cases `pnpm check` must cover, beyond the general matrix in
 - description collapse and restoration, with no height rendering a partial one;
 - both map scales, the header label's line-splitting fallback, the conditions
   hiding the zoom binding, and every map-key degradation;
+- a configured map size larger than the width and the height can render;
 - overflow navigation, preview return position, and theme invalidation.
