@@ -94,7 +94,7 @@ const MAXIMUM_MAP_CELLS = 64;
  */
 const MAP_SIZE_SPECS = {
 	columns: { key: "mapCols", cells: 16 },
-	rows: { key: "mapRows", cells: 20 },
+	rows: { key: "mapRows", cells: 18 },
 } as const satisfies Record<string, { readonly key: string; readonly cells: number }>;
 
 /** Geometry field of one configurable map dimension. */

@@ -59,7 +59,7 @@ They render here rather than through a notification, which the overlay hides.
 
 ## Context map
 
-The overview pairs a proportional map of `DEFAULT_MAP_SIZE` (16 × 20) cells by
+The overview pairs a proportional map of `DEFAULT_MAP_SIZE` (16 × 18) cells by
 default with an interactive category legend. Map geometry is an
 input rather than a constant: derive the key, Block Size, and every layout
 decision from the live geometry, and clamp a requested size to what the viewport
@@ -92,7 +92,7 @@ scroll counter, separated by one empty detail row:
 Map:
   ■ - Single category block
   ◧ - Shared block, largest category shown
-  ⛶ - Block Size: 3.1k (0.3%)
+  ⛶ - Block Size: 3.5k (0.3%)
 ```
 
 Compacted, buffer, and free glyphs need no key row, because their category rows
@@ -109,7 +109,7 @@ detail column minus the `Category:` heading and every legend row:
 
 - `MAP_KEY_DETAILED_SPARE_ROWS` (5) or more spare rows: the full key;
 - `MAP_KEY_COMPACT_SPARE_ROWS` (2) to 4: the single-line
-  `Map: ■ One category · ◧ Mixed · ⛶ 3.1k (0.3%)` key, dropping the percentage
+  `Map: ■ One category · ◧ Mixed · ⛶ 3.5k (0.3%)` key, dropping the percentage
   and then shortening `One category` to `One` before the line would truncate;
 - fewer than 2: no key.
 

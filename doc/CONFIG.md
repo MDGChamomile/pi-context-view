@@ -25,8 +25,9 @@ The config file created with `/context config` will contain:
   "compactedDataColor": "thinkingHigh",
   "autoCompactBufferColor": "dim",
   "freeSpaceColor": "dim",
+
   "mapCols": 16,
-  "mapRows": 20
+  "mapRows": 18
 }
 ```
 
