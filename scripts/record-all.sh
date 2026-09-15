@@ -1,12 +1,12 @@
 #!/bin/bash
 #
 # Re-record every committed demo asset: the s-vhs recordings under
-# scripts/recordings and the palette panel composite.
+# scripts/recordings and the palette and map-size panel composites.
 #
 # Each target pins its own session, size and palette, so this script only runs
 # them in a fixed order, keeps going after a failure, and reports what broke.
 #
-# Produces doc/images/*.gif and doc/images/palettes.png
+# Produces doc/images/*.gif, doc/images/palettes.png, and doc/images/map-sizes.png
 #
 
 set -uo pipefail
@@ -14,8 +14,8 @@ set -uo pipefail
 _RECORD_SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 readonly _RECORD_SCRIPT_DIR
 
-# recordings/palette.rec.sh is left out on purpose: it records a single panel
-# for one palette, and palettes-panel.sh already drives it once per palette
+# Single-panel recorders (palette.rec.sh and map-size.rec.sh) are left out:
+# their respective composite scripts already drive every variant
 readonly _RECORD_TARGETS=(
     'recordings/context-usage.rec.sh'
     'recordings/context-injections.rec.sh'
@@ -23,6 +23,7 @@ readonly _RECORD_TARGETS=(
     'recordings/palettes.rec.sh'
     'recordings/map-sizes.rec.sh'
     'palettes-panel.sh'
+    'map-sizes-panel.sh'
 )
 
 
