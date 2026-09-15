@@ -3,7 +3,7 @@
 # s-vhs recording of the usage view: open /context, walk the legend,
 # and preview one category.
 #
-# Produces doc/images/context-usage.gif
+# Produces context-usage.gif next to this script.
 #
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
@@ -21,7 +21,7 @@ source <(curl -fsSL https://dimk90.github.io/s-vhs/v0.5.0) && wait "$!" || exit 
 
 # The demo replays one recorded session, so its id and model are pinned
 PI_COMMAND='pi -e . --session 01a07844-4448-77ed-805f-b2d4af9cd00a'
-PI_COMMAND+=' --model anthropic/claude-opus-5 --no-extensions'
+PI_COMMAND+=' --model openai-codex/gpt-5.6-sol --no-extensions'
 PI_COMMAND+=' --thinking xhigh'
 PI_COMMAND+=' --tui-mode regular'
 
@@ -31,10 +31,11 @@ PI_COMMAND+=' --tui-mode regular'
 
 Require 'pi'
 
-SetOutput "$REPO_ROOT/doc/images/zoom.gif"
+# The recording lives next to the GIF it produces
+SetOutput "$SCRIPT_DIR/context-usage.gif"
 
 SetCols 80
-SetRows 27
+SetRows 34
 SetFontSize 36
 SetFontFamily 'Iosevka Term'
 SetTheme 'asciinema'
@@ -48,20 +49,36 @@ Start
 
 ## Recording
 
+
 # Bring pi up off camera, so the GIF opens on an idle TUI
 Run "$PI_COMMAND"
 Wait '• Release v0.2.0' # wait for session name to appear
 
-# Open the usage view
-Run '/context'
-
 Show
 
+Sleep 1
+
+# Open the usage view
+Type '/context'
+Sleep 1
+Enter
 Wait 'Context Usage'
 Sleep 2
 
-# Turn On & Off Zoom
-Key 'z'
+# Walk a few legend categories
+Down 7 0.2
+Sleep 1
+Enter
+Wait 'Tool Calls'
+Sleep 2
+
+# Preview the selected category, scroll through it, then close
+Down 3 0.5
+Sleep 1
+Up 1
+Sleep 3
+
+Escape
 Sleep 3
 
 Render

@@ -7,7 +7,7 @@
 # difference between them is the palette. The one-frame GIF intermediates stay
 # in doc/images/palettes/.
 #
-# Produces doc/images/color-palettes.png
+# Produces doc/images/palettes.png
 #
 
 set -uo pipefail
@@ -17,7 +17,7 @@ _PALETTES_REPO_ROOT=$(cd -- "$_PALETTES_SCRIPT_DIR/.." && pwd)
 readonly _PALETTES_SCRIPT_DIR _PALETTES_REPO_ROOT
 
 readonly _PALETTES_PANEL_DIR="$_PALETTES_REPO_ROOT/doc/images/palettes"
-readonly _PALETTES_RECORDER="$_PALETTES_SCRIPT_DIR/recordings/palette.rec.sh"
+readonly _PALETTES_RECORDER="$_PALETTES_SCRIPT_DIR/palette.rec.sh"
 readonly _PALETTES_OUTPUT="$_PALETTES_REPO_ROOT/doc/images/palettes.png"
 
 readonly _PALETTES_NAMES=('default' 'terrain' 'rainbow')
@@ -39,7 +39,7 @@ main() {
     #   None.
     #
     # Example:
-    #   ./scripts/palettes.sh
+    #   ./scripts/palettes-panel.sh
     #
     _palettes_check_dependencies || return 1
 

@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
 #
-# s-vhs recording of one zoomed Context Usage panel with three map sizes:
-# default (16 x 18), long-vertical (8 x 36), and big (32 x 36).
-#
-# Produces doc/images/map-sizes.gif
+# Record one zoomed Context Usage still for the map-size panel composite.
+# Usage: ./scripts/map-size.rec.sh <default|long-vertical|big>
+# Produces doc/images/map-sizes/<size>.gif and a verification text log.
 #
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-REPO_ROOT=$(cd -- "$SCRIPT_DIR/../.." && pwd)
+REPO_ROOT=$(cd -- "$SCRIPT_DIR/.." && pwd)
 
-# pi is started as `pi -e .`, so the recorded shell needs the repo root
 cd "$REPO_ROOT" || exit 1
+
+MAP_SIZE="${1-}"
+if [[ ! $MAP_SIZE =~ ^(default|long-vertical|big)$ ]]; then
+    printf 'usage: %s <default|long-vertical|big>\n' "$(basename "$0")" >&2
+    exit 1
+fi
 
 # shellcheck disable=SC1090
 source <(curl -fsSL https://dimk90.github.io/s-vhs/v0.6.0) && wait "$!" || exit 1
@@ -19,14 +23,13 @@ source <(curl -fsSL https://dimk90.github.io/s-vhs/v0.6.0) && wait "$!" || exit 
 ## Constants
 
 
-# Replay the same session and model as palettes.rec.sh without sending a prompt
+# Match the session, model, and framing of map-sizes.rec.sh without a prompt
 PI_COMMAND='pi -e . --session 01a07844-4448-77ed-805f-b2d4af9cd00a'
 PI_COMMAND+=' --model openai-codex/gpt-5.6-sol --no-extensions'
 PI_COMMAND+=' --thinking xhigh'
 PI_COMMAND+=' --tui-mode regular'
 
-MAP_SIZES=('default' 'long-vertical' 'big')
-HOLD_SECONDS=2
+PANEL_DIR="$REPO_ROOT/doc/images/map-sizes"
 REAL_AGENT_DIR="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
 
 
@@ -35,9 +38,9 @@ REAL_AGENT_DIR="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
 
 mirror_agent_dir() {
     #
-    # Mirror the user's agent directory with symlinks, substituting only this
-    # extension's config. Keep the temporary path available to the exit handler
-    # even if building the mirror fails.
+    # Mirror the user's agent directory with symlinks, replacing only this
+    # extension's config. Keep the temporary path available for exit cleanup
+    # even if construction fails.
     #
     # Parameters:
     #   None.
@@ -59,8 +62,8 @@ mirror_agent_dir() {
 
 apply_map_size() {
     #
-    # Replace the recording-owned geometry override before reopening the view.
-    # The default scene uses no config file, so it exercises built-in defaults.
+    # Write only the requested geometry to the recording-owned config.
+    # The default panel uses no config file to exercise built-in defaults.
     #
     # Parameters:
     #   $1 - size - default, long-vertical, or big.
@@ -85,21 +88,25 @@ apply_map_size() {
 
 Require 'pi'
 
-SetOutput "$REPO_ROOT/doc/images/map-sizes.gif"
+SetOutput "$PANEL_DIR/$MAP_SIZE.gif"
 
-# Keep all three geometries unclamped, with room for the legend and frame
+# All three geometries fit unclamped at the same terminal and font size
 SetCols 120
 SetRows 46
 SetFontSize 24
 SetFontFamily 'Iosevka Term'
 SetTheme 'asciinema'
-SetLastFrameDuration "$HOLD_SECONDS"
-SetOptimize 'on'
 
-# Expand the mirror path at exit, including when mirror construction fails
+# These stills are ignored intermediates, not committed animations
+SetOptimize 'off'
+SetLoop 'off'
+
+# Expand the mirror path at exit, including when construction fails
 # shellcheck disable=SC2016
 Finally '[[ -z ${AGENT_DIR-} ]] || rm -rf "$AGENT_DIR"'
 mirror_agent_dir || exit 1
+apply_map_size "$MAP_SIZE" || exit 1
+mkdir -p "$PANEL_DIR" || exit 1
 Env 'PI_CODING_AGENT_DIR' "$AGENT_DIR"
 
 Start
@@ -111,23 +118,11 @@ Start
 Run "$PI_COMMAND"
 Wait '• Release v0\.2\.0'
 
-for size in "${MAP_SIZES[@]}"; do
-    apply_map_size "$size" || exit 1
+Run '/context'
+Wait '^Context Usage'
+Key 'z'
+Wait '^Context Usage · Zoom '
 
-    Run '/context'
-    Wait '^Context Usage'
-    Key 'z'
-    Wait '^Context Usage · Zoom '
-
-    Show
-    Sleep "$HOLD_SECONDS"
-
-    # Leave the final panel visible through Render, not the underlying session
-    if [[ $size != 'big' ]]; then
-        Hide
-        Escape
-        Wait '• Release v0\.2\.0'
-    fi
-done
-
+Show
+Sleep 1
 Render

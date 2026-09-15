@@ -13,7 +13,7 @@ _MAP_SIZES_REPO_ROOT=$(cd -- "$_MAP_SIZES_SCRIPT_DIR/.." && pwd)
 readonly _MAP_SIZES_SCRIPT_DIR _MAP_SIZES_REPO_ROOT
 
 readonly _MAP_SIZES_PANEL_DIR="$_MAP_SIZES_REPO_ROOT/doc/images/map-sizes"
-readonly _MAP_SIZES_RECORDER="$_MAP_SIZES_SCRIPT_DIR/recordings/map-size.rec.sh"
+readonly _MAP_SIZES_RECORDER="$_MAP_SIZES_SCRIPT_DIR/map-size.rec.sh"
 readonly _MAP_SIZES_OUTPUT="$_MAP_SIZES_REPO_ROOT/doc/images/map-sizes.png"
 
 readonly _MAP_SIZES_NAMES=('default' 'long-vertical' 'big')

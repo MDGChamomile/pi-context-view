@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 #
-# s-vhs recording of the injections view: open /context injections,
-# walk the items, and preview one of them.
+# s-vhs recording of the usage view zoom feature.
 #
-# Produces doc/images/context-injections.gif
+# Produces zoom.gif next to this script.
 #
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
@@ -21,11 +20,9 @@ source <(curl -fsSL https://dimk90.github.io/s-vhs/v0.5.0) && wait "$!" || exit 
 
 # The demo replays one recorded session, so its id and model are pinned
 PI_COMMAND='pi -e . --session 01a07844-4448-77ed-805f-b2d4af9cd00a'
-PI_COMMAND+=' --model openai-codex/gpt-5.6-sol --no-extensions'
-PI_COMMAND+=' -e ~/.pi/agent/npm/node_modules/@eko24ive/pi-ask'
+PI_COMMAND+=' --model anthropic/claude-opus-5 --no-extensions'
 PI_COMMAND+=' --thinking xhigh'
 PI_COMMAND+=' --tui-mode regular'
-PI_COMMAND+=' --no-skills'
 
 
 ## Configuration
@@ -33,10 +30,11 @@ PI_COMMAND+=' --no-skills'
 
 Require 'pi'
 
-SetOutput "$REPO_ROOT/doc/images/context-injections.gif"
+# The recording lives next to the GIF it produces
+SetOutput "$SCRIPT_DIR/zoom.gif"
 
 SetCols 80
-SetRows 34
+SetRows 27
 SetFontSize 36
 SetFontFamily 'Iosevka Term'
 SetTheme 'asciinema'
@@ -50,38 +48,20 @@ Start
 
 ## Recording
 
-
 # Bring pi up off camera, so the GIF opens on an idle TUI
 Run "$PI_COMMAND"
 Wait '• Release v0.2.0' # wait for session name to appear
 
+# Open the usage view
+Run '/context'
+
 Show
-Sleep 1
 
-# Open the injections view:
-# - the first Enter takes the completion;
-# - the second one submits the command;
-Type '/context'
-Sleep 0.5
-Type ' '
-Sleep 0.5
-Type 'injections'
-Sleep 1
-Enter 2
-
-Wait 'Context Injections'
+Wait 'Context Usage'
 Sleep 2
 
-# Walk the items
-Down 19 0.07
-Sleep 1
-
-# Preview the selected item, then close
-Enter
-Wait 'ask_user'
-Sleep 3
-
-Escape
+# Turn On & Off Zoom
+Key 'z'
 Sleep 3
 
 Render
