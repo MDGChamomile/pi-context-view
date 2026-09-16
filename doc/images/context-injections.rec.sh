@@ -13,7 +13,7 @@ REPO_ROOT=$(cd -- "$SCRIPT_DIR/../.." && pwd)
 cd "$REPO_ROOT" || exit 1
 
 # shellcheck disable=SC1090
-source <(curl -fsSL https://dimk90.github.io/s-vhs/v0.5.0) && wait "$!" || exit 1
+source <(curl -fsSL https://dimk90.github.io/s-vhs/v0.6.0) && wait "$!" || exit 1
 
 
 ## Constants
@@ -26,6 +26,7 @@ PI_COMMAND+=' -e ~/.pi/agent/npm/node_modules/@eko24ive/pi-ask'
 PI_COMMAND+=' --thinking xhigh'
 PI_COMMAND+=' --tui-mode regular'
 PI_COMMAND+=' --no-skills'
+PI_COMMAND+=' --offline'
 
 
 ## Configuration
@@ -54,7 +55,7 @@ Start
 
 # Bring pi up off camera, so the GIF opens on an idle TUI
 Run "$PI_COMMAND"
-Wait '• Release v0.2.0' # wait for session name to appear
+Wait '• Release v0\.2\.0' # wait for session name to appear
 
 Show
 Sleep 1
