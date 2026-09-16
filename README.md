@@ -94,7 +94,7 @@ for color names that follow the current theme.
 
 You can change row x cols shape for the `Context Usage` map via config:
 
-![Map size demo]()
+![Map size demo](https://media.githubusercontent.com/media/dimk90/pi-context-view/2bc280f758d88fc0ac6396e921c7e697c9016086/doc/images/map-sizes.png)
 
 
 ## Context Footprint
