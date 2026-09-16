@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
 # Record one zoomed Context Usage still for the map-size panel composite.
-# Usage: ./scripts/map-size.rec.sh <default|long-vertical|big>
-# Produces doc/images/map-sizes/<size>.gif and a verification text log.
+# Usage: ./scripts/map-size.rec.sh [<rows> <cols>]
+# With no arguments, use a clean config and record default.gif.
+# Otherwise, produce doc/images/map-sizes/<rows>x<cols>.gif.
 #
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
@@ -10,10 +11,15 @@ REPO_ROOT=$(cd -- "$SCRIPT_DIR/.." && pwd)
 
 cd "$REPO_ROOT" || exit 1
 
-MAP_SIZE="${1-}"
-if [[ ! $MAP_SIZE =~ ^(default|long-vertical|big)$ ]]; then
-    printf 'usage: %s <default|long-vertical|big>\n' "$(basename "$0")" >&2
-    exit 1
+MAP_ROWS="${1-}"
+MAP_COLS="${2-}"
+MAP_SIZE='default'
+if [[ $# -ne 0 ]]; then
+    if [[ $# -ne 2 || ! $MAP_ROWS =~ ^[1-9][0-9]*$ || ! $MAP_COLS =~ ^[1-9][0-9]*$ ]]; then
+        printf 'usage: %s [<rows> <cols>] (positive integers)\n' "$(basename "$0")" >&2
+        exit 1
+    fi
+    MAP_SIZE="${MAP_ROWS}x${MAP_COLS}"
 fi
 
 # shellcheck disable=SC1090
@@ -64,23 +70,19 @@ mirror_agent_dir() {
 apply_map_size() {
     #
     # Write only the requested geometry to the recording-owned config.
-    # The default panel uses no config file to exercise built-in defaults.
     #
     # Parameters:
-    #   $1 - size - default, long-vertical, or big.
+    #   $1 - rows - validated map row count.
+    #   $2 - cols - validated map column count.
     #
     # Example:
-    #   apply_map_size 'long-vertical' || exit 1
+    #   apply_map_size 22 8 || exit 1
     #
-    local size="$1"
+    local rows="$1"
+    local cols="$2"
     local config_file="$AGENT_DIR/extensions/pi-context-view.json"
 
-    case "$size" in
-        default)       rm -f "$config_file" ;;
-        long-vertical) printf '%s\n' '{"mapCols":8,"mapRows":22}' > "$config_file" ;;
-        big)           printf '%s\n' '{"mapCols":22,"mapRows":22}' > "$config_file" ;;
-        *)             return 1 ;;
-    esac
+    printf '{"mapRows":%s,"mapCols":%s}\n' "$rows" "$cols" > "$config_file"
 }
 
 
@@ -91,7 +93,7 @@ Require 'pi'
 
 SetOutput "$PANEL_DIR/$MAP_SIZE.gif"
 
-# All three geometries fit unclamped at the same terminal and font size
+# The composite's three geometries fit unclamped at this terminal and font size
 SetCols 90
 SetRows 34
 SetFontSize 24
@@ -106,7 +108,9 @@ SetLoop 'off'
 # shellcheck disable=SC2016
 Finally '[[ -z ${AGENT_DIR-} ]] || rm -rf "$AGENT_DIR"'
 mirror_agent_dir || exit 1
-apply_map_size "$MAP_SIZE" || exit 1
+if [[ $MAP_SIZE != 'default' ]]; then
+    apply_map_size "$MAP_ROWS" "$MAP_COLS" || exit 1
+fi
 mkdir -p "$PANEL_DIR" || exit 1
 Env 'PI_CODING_AGENT_DIR' "$AGENT_DIR"
 

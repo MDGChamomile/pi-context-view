@@ -16,8 +16,9 @@ readonly _MAP_SIZES_PANEL_DIR="$_MAP_SIZES_REPO_ROOT/doc/images/map-sizes"
 readonly _MAP_SIZES_RECORDER="$_MAP_SIZES_SCRIPT_DIR/map-size.rec.sh"
 readonly _MAP_SIZES_OUTPUT="$_MAP_SIZES_REPO_ROOT/doc/images/map-sizes.png"
 
-readonly _MAP_SIZES_NAMES=('default' 'long-vertical' 'big')
-readonly _MAP_SIZES_CAPTIONS=('default (16 × 16)' '8 × 22' '22 × 22') # TODO
+# Empty dimensions reserve the first panel for clean-config defaults
+readonly _MAP_SIZES_ROWS=('' 22 22)
+readonly _MAP_SIZES_COLS=('' 8 22)
 
 # Match the palette composite and agg's asciinema theme
 readonly _MAP_SIZES_BACKGROUND='#121314'
@@ -39,9 +40,13 @@ main() {
     #
     _map_sizes_check_dependencies || return 1
 
-    local size
-    for size in "${_MAP_SIZES_NAMES[@]}"; do
-        _map_sizes_record_panel "$size" || return 1
+    local index
+    for index in "${!_MAP_SIZES_ROWS[@]}"; do
+        if [[ $index -eq 0 ]]; then
+            _map_sizes_record_panel || return 1
+        else
+            _map_sizes_record_panel "${_MAP_SIZES_ROWS[index]}" "${_MAP_SIZES_COLS[index]}" || return 1
+        fi
         printf '\n'
     done
 
@@ -93,17 +98,24 @@ _map_sizes_check_dependencies() {
 
 _map_sizes_record_panel() {
     #
-    # Record one geometry and verify its GIF exists and is nonempty.
+    # Record one geometry (or clean-config defaults with no arguments) and
+    # verify its GIF exists and is nonempty.
     #
     # Parameters:
-    #   $1 - size - size name passed to the recorder.
+    #   $1 - rows - (optional) - map row count; requires cols.
+    #   $2 - cols - (optional) - map column count; requires rows.
     #
     # Example:
-    #   _map_sizes_record_panel 'long-vertical' || return 1
+    #   _map_sizes_record_panel 22 8 || return 1
     #
-    local size="$1"
+    local rows="${1-}"
+    local cols="${2-}"
+    local size='default'
 
-    "$_MAP_SIZES_RECORDER" "$size" || return 1
+    if [[ $# -ne 0 ]]; then
+        size="${rows}x${cols}"
+    fi
+    "$_MAP_SIZES_RECORDER" "$@" || return 1
     [[ -s $_MAP_SIZES_PANEL_DIR/$size.gif ]] || {
         printf 'map-sizes: %s panel GIF is missing or empty\n' "$size" >&2
         return 1
@@ -125,16 +137,24 @@ _map_sizes_composite() {
     #
     local panels=()
     local index
+    local caption
+    local size
 
-    for index in "${!_MAP_SIZES_NAMES[@]}"; do
+    for index in "${!_MAP_SIZES_ROWS[@]}"; do
+        size="${_MAP_SIZES_ROWS[index]}x${_MAP_SIZES_COLS[index]}"
+        caption="${_MAP_SIZES_COLS[index]} × ${_MAP_SIZES_ROWS[index]}"
+        if [[ $index -eq 0 ]]; then
+            size='default'
+            caption='default'
+        fi
         panels+=(
             '('
             -background "$_MAP_SIZES_BACKGROUND"
             -fill "$_MAP_SIZES_FOREGROUND"
             -font "$_MAP_SIZES_CAPTION_FONT"
             -pointsize "$_MAP_SIZES_CAPTION_SIZE"
-            "$_MAP_SIZES_PANEL_DIR/${_MAP_SIZES_NAMES[index]}.gif[0]"
-            "label:${_MAP_SIZES_CAPTIONS[index]}"
+            "$_MAP_SIZES_PANEL_DIR/$size.gif[0]"
+            "label:$caption"
             -gravity center
             -append
             ')'
