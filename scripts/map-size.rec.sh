@@ -28,6 +28,7 @@ PI_COMMAND='pi -e . --session 01a07844-4448-77ed-805f-b2d4af9cd00a'
 PI_COMMAND+=' --model openai-codex/gpt-5.6-sol --no-extensions'
 PI_COMMAND+=' --thinking xhigh'
 PI_COMMAND+=' --tui-mode regular'
+PI_COMMAND+=' --offline'
 
 PANEL_DIR="$REPO_ROOT/doc/images/map-sizes"
 REAL_AGENT_DIR="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
@@ -76,8 +77,8 @@ apply_map_size() {
 
     case "$size" in
         default)       rm -f "$config_file" ;;
-        long-vertical) printf '%s\n' '{"mapCols":8,"mapRows":36}' > "$config_file" ;;
-        big)           printf '%s\n' '{"mapCols":32,"mapRows":36}' > "$config_file" ;;
+        long-vertical) printf '%s\n' '{"mapCols":8,"mapRows":22}' > "$config_file" ;;
+        big)           printf '%s\n' '{"mapCols":22,"mapRows":22}' > "$config_file" ;;
         *)             return 1 ;;
     esac
 }
@@ -91,8 +92,8 @@ Require 'pi'
 SetOutput "$PANEL_DIR/$MAP_SIZE.gif"
 
 # All three geometries fit unclamped at the same terminal and font size
-SetCols 120
-SetRows 46
+SetCols 90
+SetRows 34
 SetFontSize 24
 SetFontFamily 'Iosevka Term'
 SetTheme 'asciinema'

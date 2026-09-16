@@ -24,6 +24,7 @@ PI_COMMAND='pi -e . --session 01a07844-4448-77ed-805f-b2d4af9cd00a'
 PI_COMMAND+=' --model openai-codex/gpt-5.6-sol --no-extensions'
 PI_COMMAND+=' --thinking xhigh'
 PI_COMMAND+=' --tui-mode regular'
+PI_COMMAND+=' --offline'
 
 MAP_SIZES=('default' 'long-vertical' 'big')
 HOLD_SECONDS=2
@@ -73,8 +74,8 @@ apply_map_size() {
 
     case "$size" in
         default)       rm -f "$config_file" ;;
-        long-vertical) printf '%s\n' '{"mapCols":8,"mapRows":36}' > "$config_file" ;;
-        big)           printf '%s\n' '{"mapCols":32,"mapRows":36}' > "$config_file" ;;
+        long-vertical) printf '%s\n' '{"mapCols":8,"mapRows":22}' > "$config_file" ;;
+        big)           printf '%s\n' '{"mapCols":22,"mapRows":22}' > "$config_file" ;;
         *)             return 1 ;;
     esac
 }
@@ -89,8 +90,8 @@ Require 'pi'
 SetOutput "$SCRIPT_DIR/map-sizes.gif"
 
 # Keep all three geometries unclamped, with room for the legend and frame
-SetCols 120
-SetRows 46
+SetCols 90
+SetRows 34
 SetFontSize 24
 SetFontFamily 'Iosevka Term'
 SetTheme 'asciinema'

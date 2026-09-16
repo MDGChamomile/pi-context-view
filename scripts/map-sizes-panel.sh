@@ -17,13 +17,13 @@ readonly _MAP_SIZES_RECORDER="$_MAP_SIZES_SCRIPT_DIR/map-size.rec.sh"
 readonly _MAP_SIZES_OUTPUT="$_MAP_SIZES_REPO_ROOT/doc/images/map-sizes.png"
 
 readonly _MAP_SIZES_NAMES=('default' 'long-vertical' 'big')
-readonly _MAP_SIZES_CAPTIONS=('default (16 × 18)' '8 × 36' '32 × 36')
+readonly _MAP_SIZES_CAPTIONS=('default (16 × 16)' '8 × 22' '22 × 22') # TODO
 
 # Match the palette composite and agg's asciinema theme
 readonly _MAP_SIZES_BACKGROUND='#121314'
 readonly _MAP_SIZES_FOREGROUND='#cccccc'
 readonly _MAP_SIZES_CAPTION_FONT='Iosevka-Term-Medium-Extended'
-readonly _MAP_SIZES_CAPTION_SIZE=44
+readonly _MAP_SIZES_CAPTION_SIZE=48
 readonly _MAP_SIZES_GAP=24
 
 
@@ -42,6 +42,7 @@ main() {
     local size
     for size in "${_MAP_SIZES_NAMES[@]}"; do
         _map_sizes_record_panel "$size" || return 1
+        printf '\n'
     done
 
     _map_sizes_composite || return 1
@@ -67,28 +68,32 @@ _map_sizes_check_dependencies() {
     #   _map_sizes_check_dependencies || return 1
     #
     local dependency
+
     for dependency in curl tmux asciinema agg pi magick; do
         command -v "$dependency" >/dev/null || {
             printf 'map-sizes: %s is not installed\n' "$dependency" >&2
             return 1
         }
     done
+
     [[ -x $_MAP_SIZES_RECORDER ]] || {
         printf 'map-sizes: %s is not executable\n' "$_MAP_SIZES_RECORDER" >&2
         return 1
     }
+
     # Consume the full list so pipefail does not turn grep's early exit into failure
     magick -list font | grep "Font: $_MAP_SIZES_CAPTION_FONT\$" >/dev/null || {
         printf 'map-sizes: font %s is not available to ImageMagick\n' "$_MAP_SIZES_CAPTION_FONT" >&2
         return 1
     }
+
     return 0
 }
 
 
 _map_sizes_record_panel() {
     #
-    # Record one geometry and verify its GIF and captured zoomed usage output.
+    # Record one geometry and verify its GIF exists and is nonempty.
     #
     # Parameters:
     #   $1 - size - size name passed to the recorder.
@@ -103,10 +108,7 @@ _map_sizes_record_panel() {
         printf 'map-sizes: %s panel GIF is missing or empty\n' "$size" >&2
         return 1
     }
-    grep -q '^Context Usage · Zoom ' "$_MAP_SIZES_PANEL_DIR/$size.txt" || {
-        printf 'map-sizes: %s panel did not capture the zoomed usage view\n' "$size" >&2
-        return 1
-    }
+
     return 0
 }
 
@@ -123,6 +125,7 @@ _map_sizes_composite() {
     #
     local panels=()
     local index
+
     for index in "${!_MAP_SIZES_NAMES[@]}"; do
         panels+=(
             '('

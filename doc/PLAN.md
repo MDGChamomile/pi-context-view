@@ -1,7 +1,7 @@
 
 ## `Backlog`
 
-- [ ] Add recording for map row/col customization demo.
+- [x] Add recording for map row/col customization demo.
 
 - [x] **Update demo recordings**:
   - [x] Switch to the new `S-VHS` version.

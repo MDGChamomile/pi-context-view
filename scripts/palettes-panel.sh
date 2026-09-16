@@ -46,6 +46,7 @@ main() {
     local palette
     for palette in "${_PALETTES_NAMES[@]}"; do
         _palettes_record_panel "$palette" || return 1
+        printf '\n'
     done
 
     _palettes_composite || return 1
