@@ -511,10 +511,24 @@ interface MessagePreview {
 	readonly jsonSpan?: JsonSpan;
 }
 
-/** Extract provider-bound message content for raw preview. */
+/** Extract message content for preview without retaining opaque assistant signatures. */
 function messagePreview(message: ContextEvent["messages"][number]): MessagePreview {
 	if (!("content" in message)) return serializedPreview(JSON.stringify(message));
 	if (typeof message.content === "string") return { text: message.content };
+	if (message.role === "assistant") {
+		const content = message.content.map((block) => {
+			if (block.type === "thinking") {
+				const { thinkingSignature, ...preview } = block;
+				return preview;
+			}
+			if (block.type === "toolCall") {
+				const { thoughtSignature, ...preview } = block;
+				return preview;
+			}
+			return block;
+		});
+		return serializedPreview(JSON.stringify(content));
+	}
 	return serializedPreview(JSON.stringify(message.content));
 }
 

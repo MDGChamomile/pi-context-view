@@ -178,7 +178,7 @@ Configuration holds preferences only; the privacy contract below forbids storing
 
 Raw prompt and message content stays process-local. Sanitize it before terminal rendering and reveal it only after explicit Enter preview. Never log it, add it to notifications, persist additional copies, or inject it into a later model request.
 
-Opaque `thinkingSignature` and `thoughtSignature` bytes may be inspected only for length. Never retain, tokenize, render, preview, or log the bytes themselves. Persisted probe records contain only role and timestamp identities.
+Opaque `thinkingSignature` and `thoughtSignature` bytes may be inspected only for length. Never retain, tokenize, render, preview, or log the bytes themselves. Strip these fields from assistant thinking/tool-call blocks before serializing injected-message previews, including context-only replacements; leave the provider-bound message and tool arguments unchanged. Persisted probe records contain only role and timestamp identities.
 
 ## Required invariants
 
