@@ -10,6 +10,7 @@
 * `[usage]` Set the default context map to 16x16 cells.
 * `[ui]` Explain `Highlighted`, `(guess)`, `Dropped`, and `Moved` as color-keyed description bullets.
 * `[capture]` Report injected image sizes in previews instead of their base64 payloads.
+* `[capture]` Show summary and bash content in previews instead of whole-message metadata.
 
 ### Fixed
 * `[text]` Avoid quadratic scanning of unterminated terminal strings while sanitizing previews ([#8](https://github.com/dimk90/pi-context-view/pull/8) by [@MDGChamomile](https://github.com/MDGChamomile)).

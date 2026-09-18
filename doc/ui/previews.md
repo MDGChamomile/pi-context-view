@@ -131,6 +131,15 @@ parts named after them; a line carrying more than its heading, such as pi's
 `Pi documentation (…):` sentence, stays visible. This preview-only omission
 still counts the dropped line toward the estimate shown in that heading.
 
+## Captured message content
+
+Captured branch and compaction summaries show only the summary text, without
+message-envelope bookkeeping. Captured bash executions show pi's provider-facing
+text, including failure, cancellation, and truncation notices; a full-output
+path appears only when pi includes it in a truncation notice. These previews are
+plain text, not marked JSON, even when a summary itself looks like JSON. Both
+Injections and Usage's frozen context-only entries use this captured form.
+
 ## Marked JSON
 
 Preview text may carry a JSON document that the model marks structurally — a

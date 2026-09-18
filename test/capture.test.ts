@@ -278,6 +278,64 @@ test("Initial capture reports injected image sizes instead of retaining their pa
 	assert.deepEqual([imageUser, imageToolResult], original);
 });
 
+test("captured summary previews omit envelope metadata without changing the content", () => {
+	const messages = [
+		{
+			role: "compactionSummary", summary: "We fixed image previews.\nNext: update the tests.",
+			tokensBefore: 42_000, timestamp: 1_700_000_000_000,
+		},
+		{
+			role: "branchSummary", summary: '{"fromId":"actual summary content"}',
+			fromId: "INTERNAL_BRANCH_ID", timestamp: 1_700_000_000_001,
+		},
+	] satisfies ContextEvent["messages"];
+	const original = structuredClone(messages);
+	const items = measureInjectedMessages(messages, []);
+
+	assert.deepEqual(items.map((item) => item.text), messages.map((message) => message.summary));
+	for (const [index, item] of items.entries()) {
+		assert.equal(item.jsonSpan, undefined);
+		assert.equal(item.chars, item.text.length);
+		assert.equal(item.tokens, estimateTokens(messages[index]));
+		assert.equal(item.contextOnly, true);
+	}
+	assert.deepEqual(messages, original);
+	assert.deepEqual(measureInjectedMessages(messages, original), []);
+});
+
+test("captured bash previews use provider-facing text instead of message metadata", () => {
+	const base = {
+		role: "bashExecution", command: "ls", output: "example.txt", exitCode: 0,
+		cancelled: false, truncated: false, fullOutputPath: "/tmp/full-output.txt", timestamp: 1,
+	} satisfies ContextEvent["messages"][number];
+	const messages = [
+		base,
+		{ ...base, output: "", timestamp: 2 },
+		{ ...base, output: "failed", exitCode: 2, timestamp: 3 },
+		{ ...base, output: "partial", exitCode: undefined, cancelled: true, timestamp: 4 },
+		{ ...base, truncated: true, timestamp: 5 },
+		{ ...base, excludeFromContext: true, timestamp: 6 },
+	];
+	const original = structuredClone(messages);
+	const items = measureInjectedMessages(messages, []);
+
+	assert.deepEqual(items.map((item) => item.text), [
+		"Ran `ls`\n```\nexample.txt\n```",
+		"Ran `ls`\n(no output)",
+		"Ran `ls`\n```\nfailed\n```\n\nCommand exited with code 2",
+		"Ran `ls`\n```\npartial\n```\n\n(command cancelled)",
+		"Ran `ls`\n```\nexample.txt\n```\n\n[Output truncated. Full output: /tmp/full-output.txt]",
+		"",
+	]);
+	for (const [index, item] of items.entries()) {
+		assert.equal(item.jsonSpan, undefined);
+		assert.equal(item.chars, item.text.length);
+		assert.equal(item.tokens, estimateTokens(messages[index]));
+	}
+	assert.deepEqual(messages, original);
+	assert.deepEqual(measureInjectedMessages(messages, original), []);
+});
+
 test("mergeContextOnlyMessages carries only provider-context mutations into Usage snapshots", () => {
 	const source = { id: "aggregate:extensions", label: "unattributed", native: false };
 	const contextMessage = {

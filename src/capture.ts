@@ -6,6 +6,7 @@
 import {
 	type BuildSystemPromptOptions,
 	type ContextEvent,
+	convertToLlm,
 	estimateTokens,
 	formatSize,
 	type InputSource,
@@ -512,9 +513,19 @@ interface MessagePreview {
 	readonly jsonSpan?: JsonSpan;
 }
 
-/** Extract message content for preview without retaining opaque assistant signatures. */
+/** Extract content-only previews without raw image payloads or opaque assistant signatures. */
 function messagePreview(message: ContextEvent["messages"][number]): MessagePreview {
-	if (!("content" in message)) return serializedPreview(JSON.stringify(message));
+	if (message.role === "branchSummary" || message.role === "compactionSummary") {
+		return { text: message.summary };
+	}
+	if (message.role === "bashExecution") {
+		const content = convertToLlm([message])[0]?.content ?? "";
+		return {
+			text: typeof content === "string"
+				? content
+				: content.flatMap((block) => block.type === "text" ? [block.text] : []).join("\n"),
+		};
+	}
 	if (typeof message.content === "string") return { text: message.content };
 	if (message.role === "assistant") {
 		const content = message.content.map((block) => {

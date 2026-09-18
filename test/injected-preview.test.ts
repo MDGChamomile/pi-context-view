@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { Theme, type ThemeColor } from "@earendil-works/pi-coding-agent";
+import { type ContextEvent, Theme, type ThemeColor } from "@earendil-works/pi-coding-agent";
 import { visibleWidth } from "@earendil-works/pi-tui";
 
+import { measureInjectedMessages, mergeContextOnlyMessages } from "../src/capture.ts";
 import { DEFAULT_CATEGORY_COLORS, DEFAULT_MAP_SIZE, THEME_COLOR_NAMES } from "../src/config.ts";
 import { analyzeSystemPrompt } from "../src/measure.ts";
 import { buildSnapshot, type InitialSnapshot } from "../src/model.ts";
@@ -140,6 +141,46 @@ function assertFrame(lines: readonly string[], width: number, height: number): v
 	assert.ok(lines.length <= height);
 	assert.ok(lines.every((line) => visibleWidth(line) <= width));
 }
+
+test("captured summaries and bash text reach both previews without envelope metadata", () => {
+	const messages = [
+		{ role: "compactionSummary", summary: "CAPTURE_VISIBLE_SUMMARY", tokensBefore: 42_000, timestamp: 1 },
+		{ role: "branchSummary", summary: "CAPTURE_VISIBLE_SUMMARY", fromId: "INTERNAL_BRANCH_ID", timestamp: 2 },
+		{
+			role: "bashExecution", command: "ls", output: "CAPTURE_VISIBLE_OUTPUT", exitCode: 2,
+			cancelled: false, truncated: false, timestamp: 3,
+		},
+	] satisfies ContextEvent["messages"];
+	for (const message of messages) {
+		let height = 40;
+		const snapshot = buildSnapshot(measureInjectedMessages([message], []), "real-turn", new Date());
+		const current = buildSnapshot([], "synthetic-probe", new Date());
+		const theme = createTheme();
+		const injections = new InjectionsView(theme, { snapshot }, () => {}, () => height);
+		injections.handleInput("j"); // Select the message below its source group
+		const usage = new UsageView(theme, {
+			usage: computeUsage({ snapshot: mergeContextOnlyMessages(current, snapshot), messages: [] }),
+			categoryColors: DEFAULT_CATEGORY_COLORS, mapSize: DEFAULT_MAP_SIZE,
+		}, () => {}, () => height);
+		for (const view of [injections, usage]) {
+			const overview = view.render(120);
+			assert.doesNotMatch(plain(overview), /CAPTURE_VISIBLE/);
+			view.handleInput("\r");
+			const preview = plain(view.render(120));
+			assert.match(preview, /CAPTURE_VISIBLE/);
+			assert.doesNotMatch(preview, /"role"|"summary"|tokensBefore|fromId|timestamp|exitCode|INTERNAL_BRANCH_ID/);
+			if (message.role === "bashExecution") {
+				assert.match(preview, /Ran `ls`/);
+				assert.match(preview, /Command exited with code 2/);
+			}
+			for (const width of [30, 60, 80, 120]) {
+				for (height of [12, 40]) assertFrame(view.render(width), width, height);
+			}
+			view.handleInput("\u001b");
+			assert.deepEqual(view.render(120), overview);
+		}
+	}
+});
 
 test("Injections shows attributed guidelines only after Enter, for parent and child previews", () => {
 	let height = 40;
