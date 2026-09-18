@@ -10,6 +10,10 @@
 * `[usage]` Set the default context map to 16x16 cells.
 * `[ui]` Explain `Highlighted`, `(guess)`, `Dropped`, and `Moved` as color-keyed description bullets.
 
+### Fixed
+* `[context]` Strip opaque thinking and tool-call signatures from captured assistant previews ([#7](https://github.com/dimk90/pi-context-view/pull/7) by [@MDGChamomile](https://github.com/MDGChamomile)).
+* `[ui]` Avoid quadratic scanning of unterminated terminal strings while sanitizing previews ([#8](https://github.com/dimk90/pi-context-view/pull/8) by [@MDGChamomile](https://github.com/MDGChamomile)).
+
 
 ## `[v0.5.2]` - 08.09.2026
 
