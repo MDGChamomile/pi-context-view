@@ -7,6 +7,7 @@ import {
 	type BuildSystemPromptOptions,
 	type ContextEvent,
 	estimateTokens,
+	formatSize,
 	type InputSource,
 	type SlashCommandInfo,
 	type SourceInfo,
@@ -533,7 +534,19 @@ function messagePreview(message: ContextEvent["messages"][number]): MessagePrevi
 		});
 		return serializedPreview(JSON.stringify(content));
 	}
-	return serializedPreview(JSON.stringify(message.content));
+	return serializedPreview(JSON.stringify(message.content.map(imagePreviewBlock)));
+}
+
+/**
+ * Replace a captured image payload with the size it occupied, so a preview
+ * reports what the message carried without retaining or rendering its bytes.
+ * Sizes measure the base64 text as captured, not the decoded image.
+ */
+function imagePreviewBlock<Block extends { readonly type: string }>(block: Block): Block {
+	if (block.type !== "image") return block;
+	const data = (block as { readonly data?: unknown }).data;
+	if (typeof data !== "string") return block;
+	return { ...block, data: `<${formatSize(data.length)} omitted>` };
 }
 
 /** Preview whose whole text is one serialized JSON document. */

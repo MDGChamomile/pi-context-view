@@ -243,6 +243,41 @@ test("Initial capture omits opaque signatures from injected and transformed assi
 	assert.deepEqual(measureInjectedMessages([message], [original]), []);
 });
 
+test("Initial capture reports injected image sizes instead of retaining their payloads", () => {
+	const payload = "B".repeat(2_048);
+	const imageUser = {
+		role: "user",
+		content: [
+			{ type: "text", text: "look at this" },
+			{ type: "image", data: payload, mimeType: "image/png" },
+		],
+		timestamp: 1,
+	} satisfies ContextEvent["messages"][number];
+	const imageToolResult = {
+		role: "toolResult",
+		toolCallId: "call-1",
+		toolName: "screenshot",
+		content: [{ type: "image", data: "tiny", mimeType: "image/jpeg" }],
+		isError: false,
+		timestamp: 2,
+	} satisfies ContextEvent["messages"][number];
+	const original = structuredClone([imageUser, imageToolResult]);
+
+	const items = measureInjectedMessages([imageUser, imageToolResult], []);
+
+	assert.deepEqual(JSON.parse(items[0]?.text ?? ""), [
+		{ type: "text", text: "look at this" },
+		{ type: "image", data: "<2.0KB omitted>", mimeType: "image/png" },
+	]);
+	assert.deepEqual(JSON.parse(items[1]?.text ?? ""), [
+		{ type: "image", data: "<4B omitted>", mimeType: "image/jpeg" },
+	]);
+	// Estimates keep using pi's own image proxy, which the omitted text must not change.
+	assert.equal(items[0]?.tokens, estimateTokens(imageUser));
+	assert.equal(items[0]?.chars, items[0]?.text.length);
+	assert.deepEqual([imageUser, imageToolResult], original);
+});
+
 test("mergeContextOnlyMessages carries only provider-context mutations into Usage snapshots", () => {
 	const source = { id: "aggregate:extensions", label: "unattributed", native: false };
 	const contextMessage = {
