@@ -53,7 +53,7 @@ test("createDefaultConfigFile atomically creates every built-in default", (conte
 		["autoCompactBufferColor", "dim"],
 		["freeSpaceColor", "dim"],
 		["mapCols", 16],
-		["mapRows", 18],
+		["mapRows", 16],
 	]);
 	assert.deepEqual(readdirSync(dirname(filePath)), ["pi-context-view.json"]);
 

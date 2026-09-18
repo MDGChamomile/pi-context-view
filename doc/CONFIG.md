@@ -27,7 +27,7 @@ The config file created with `/context config` will contain:
   "freeSpaceColor": "dim",
 
   "mapCols": 16,
-  "mapRows": 18
+  "mapRows": 16
 }
 ```
 
