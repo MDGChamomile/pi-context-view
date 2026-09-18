@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { estimateTokens } from "@earendil-works/pi-coding-agent";
+
 import type {
 	BuildSystemPromptOptions,
 	ContextEvent,
@@ -179,6 +181,56 @@ test("measureInjectedMessages attributes custom and context-only messages withou
 	assert.equal(items[2]?.jsonSpan, undefined);
 	assert.equal(items[3]?.text, '[{"type":"text","text":"injected"}]');
 	assert.deepEqual(items[3]?.jsonSpan, { start: 0, end: items[3]?.text.length });
+});
+
+test("Initial capture omits opaque signatures from injected and transformed assistant previews", () => {
+	const message = {
+		...assistantMessage("aborted", 8),
+		content: [
+			{ type: "text", text: "visible answer" },
+			{ type: "thinking", thinking: "visible reasoning", thinkingSignature: "OPAQUE_THINKING_SENTINEL" },
+			{
+				type: "toolCall", id: "call-1", name: "read",
+				arguments: { path: "example.txt", thinkingSignature: "argument data", thoughtSignature: "more argument data" },
+				thoughtSignature: "OPAQUE_THOUGHT_SENTINEL",
+			},
+		],
+	} satisfies Extract<ContextEvent["messages"][number], { role: "assistant" }>;
+	const original = structuredClone(message);
+	const expectedTokens = estimateTokens(message);
+	const baselines: ContextEvent["messages"][] = [
+		[],
+		[{ ...message, content: [{ type: "text", text: "before context transformation" }] }],
+	];
+	for (const baselineMessages of baselines) {
+		const originalBaseline = structuredClone(baselineMessages);
+		const capture = new InitialCaptureState();
+		capture.prepare({ cwd: "/tmp", customPrompt: "system" });
+		const snapshot = capture.finalize(() => ({
+			systemPrompt: "system", messages: [message], baselineMessages,
+			allTools: [], activeToolNames: [], origin: "real-turn",
+		}));
+		assert.ok(snapshot);
+		const item = snapshot.groups.flatMap((group) => group.items).find((item) => item.kind === "message");
+		assert.ok(item);
+		assert.equal(item.contextOnly, true);
+		assert.equal(item.tokens, expectedTokens);
+		assert.equal(item.chars, item.text.length);
+		assert.deepEqual(item.jsonSpan, { start: 0, end: item.text.length });
+		assert.deepEqual(JSON.parse(item.text), [
+			{ type: "text", text: "visible answer" },
+			{ type: "thinking", thinking: "visible reasoning" },
+			{
+				type: "toolCall", id: "call-1", name: "read",
+				arguments: { path: "example.txt", thinkingSignature: "argument data", thoughtSignature: "more argument data" },
+			},
+		]);
+		assert.doesNotMatch(JSON.stringify(snapshot), /OPAQUE_THINKING_SENTINEL|OPAQUE_THOUGHT_SENTINEL/);
+		assert.deepEqual(message, original);
+		assert.deepEqual(baselineMessages, originalBaseline);
+	}
+	// Preview-only redaction does not change structural baseline matching.
+	assert.deepEqual(measureInjectedMessages([message], [original]), []);
 });
 
 test("mergeContextOnlyMessages carries only provider-context mutations into Usage snapshots", () => {
