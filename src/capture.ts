@@ -517,6 +517,10 @@ function messagePreview(message: ContextEvent["messages"][number]): MessagePrevi
 	if (typeof message.content === "string") return { text: message.content };
 	if (message.role === "assistant") {
 		const content = message.content.map((block) => {
+			if (block.type === "text") {
+				const { textSignature, ...preview } = block;
+				return preview;
+			}
 			if (block.type === "thinking") {
 				const { thinkingSignature, ...preview } = block;
 				return preview;

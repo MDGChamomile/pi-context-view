@@ -187,11 +187,16 @@ test("Initial capture omits opaque signatures from injected and transformed assi
 	const message = {
 		...assistantMessage("aborted", 8),
 		content: [
-			{ type: "text", text: "visible answer" },
+			{ type: "text", text: "visible answer", textSignature: "OPAQUE_TEXT_SENTINEL" },
 			{ type: "thinking", thinking: "visible reasoning", thinkingSignature: "OPAQUE_THINKING_SENTINEL" },
 			{
 				type: "toolCall", id: "call-1", name: "read",
-				arguments: { path: "example.txt", thinkingSignature: "argument data", thoughtSignature: "more argument data" },
+				arguments: {
+					path: "example.txt",
+					textSignature: "text argument data",
+					thinkingSignature: "argument data",
+					thoughtSignature: "more argument data",
+				},
 				thoughtSignature: "OPAQUE_THOUGHT_SENTINEL",
 			},
 		],
@@ -222,10 +227,15 @@ test("Initial capture omits opaque signatures from injected and transformed assi
 			{ type: "thinking", thinking: "visible reasoning" },
 			{
 				type: "toolCall", id: "call-1", name: "read",
-				arguments: { path: "example.txt", thinkingSignature: "argument data", thoughtSignature: "more argument data" },
+				arguments: {
+					path: "example.txt",
+					textSignature: "text argument data",
+					thinkingSignature: "argument data",
+					thoughtSignature: "more argument data",
+				},
 			},
 		]);
-		assert.doesNotMatch(JSON.stringify(snapshot), /OPAQUE_THINKING_SENTINEL|OPAQUE_THOUGHT_SENTINEL/);
+		assert.doesNotMatch(JSON.stringify(snapshot), /OPAQUE_(TEXT|THINKING|THOUGHT)_SENTINEL/);
 		assert.deepEqual(message, original);
 		assert.deepEqual(baselineMessages, originalBaseline);
 	}
